@@ -13,9 +13,11 @@ return {
         },
       },
       "williamboman/mason.nvim",
-      "williamboman/mason-lspconfig.nvim"
+      "williamboman/mason-lspconfig.nvim",
+      "thatnerdjosh/nvim-ketho-wow",
     },
     config = function()
+      require("nvim-ketho-wow").setup()
       local capabilities = require('blink.cmp').get_lsp_capabilities()
       require("lspconfig").lua_ls.setup { capabilities = capabilities }
 
