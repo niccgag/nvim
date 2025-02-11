@@ -15,30 +15,89 @@ return {
       "williamboman/mason.nvim",
       "williamboman/mason-lspconfig.nvim",
       "thatnerdjosh/nvim-ketho-wow",
+      "jose-elias-alvarez/null-ls.nvim",
+      "MunifTanjim/prettier.nvim",
+      "mfussenegger/nvim-dap",
+      "jay-babu/mason-nvim-dap.nvim"
     },
     config = function()
-      require("nvim-ketho-wow").setup()
+      local util = require("lspconfig.util")
       local capabilities = require('blink.cmp').get_lsp_capabilities()
-      require("lspconfig").lua_ls.setup { capabilities = capabilities }
 
       require("mason").setup()
-      require("mason-lspconfig").setup()
+      require("mason-nvim-dap").setup()
+      require("mason-lspconfig").setup {
+        ensure_installed = { "lua_ls", "ts_ls" },
+        automatic_installation = true,
+      }
 
-      vim.api.nvim_create_autocmd("LspAttach", {
-        callback = function(args)
-          local client = vim.lsp.get_client_by_id(args.data.client_id)
-          if not client then return end
+      require("lspconfig").lua_ls.setup { capabilities = capabilities }
+      require("nvim-ketho-wow").setup()
+      require("lspconfig").ts_ls.setup {
+        cmd = { "typescript-language-server", "--stdio" },
+        filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" },
+        hostInfo = "neovim"
+      }
+      require("lspconfig").rust_analyzer.setup{
+        settings = {
+          ["rust_analyzer"] = {
+            diagnostics = {
+              enable = false;
+            }
+          }
+        }
+      }
+      require("lspconfig").gopls.setup{}
+      require("lspconfig").phpactor.setup({
+        filetypes = { "php", "blade"},
+      })
+      require("lspconfig").zls.setup{}
 
+
+      local null_ls = require("null-ls")
+
+      local group = vim.api.nvim_create_augroup("lsp_formate_on_save", { clear = false })
+      local event = "BufWritePre"
+      local async = event == "BufWritePost"
+
+      null_ls.setup({
+        on_attach = function(client, bufnr)
           if client.supports_method("textDocument/formatting") then
-            vim.api.nvim_create_autocmd("BufWritePre", {
-              buffer = args.buf,
+            vim.keymap.set("n", "<Leader>f", function()
+              vim.lsp.buf.format({ bufnr = vim.api.nvim_get_current_buf() })
+            end, { buffer = bufnr, desc = "[lsp] format" })
+
+            vim.api.nvim_clear_autocmds({ buffer = bufnr, group = group })
+            vim.api.nvim_create_autocmd(event, {
+              buffer = bufnr,
+              group = group,
               callback = function()
-                vim.lsp.buf.format({ bufnr = args.buf, id = client.id })
+                vim.lsp.buf.format({ bufnr = bufnr, async = async })
               end,
+              desc = "[lsp] format on save",
             })
           end
-        end,
+
+          if client.supports_method("textDocument/rangeFormatting") then
+            vim.keymap.set("x", "<Leader>f", function()
+              vim.lsp.buf.format({ bufnr = vim.api.nvim_get_current_buf() })
+            end, { buffer = bufnr, desc = "[lsp] format" })
+          end
+        end
       })
-    end,
-  }
-}
+
+      require("prettier").setup({
+        bin = "prettier",
+        filetypes = {
+          "css",
+          "html",
+          "javascript",
+          "javascriptreact",
+          "json",
+          "typescript",
+          "typescriptreact",
+          "yaml",
+        },
+      })
+    end
+  } }

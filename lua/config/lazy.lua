@@ -6,7 +6,7 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
   if vim.v.shell_error ~= 0 then
     vim.api.nvim_echo({
       { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-      { out,                            "WarningMsg" },
+      { out, "WarningMsg" },
       { "\nPress any key to exit..." },
     }, true, {})
     vim.fn.getchar()
@@ -24,13 +24,20 @@ vim.g.maplocalleader = "\\"
 -- Setup lazy.nvim
 require("lazy").setup({
   spec = {
-    { "folke/tokyonight.nvim",  config = function() vim.cmd.colorscheme "tokyonight" end },
-    { "wakatime/vim-wakatime",  lazy = false },
+    {
+      "folke/tokyonight.nvim",
+      config = function()
+        vim.cmd.colorscheme("tokyonight")
+      end,
+    },
+    { "wakatime/vim-wakatime", lazy = false },
+    { "windwp/nvim-autopairs", event = "InsertEnter", config = true },
+    { "ThePrimeagen/vim-be-good" },
     -- import your plugins
     { import = "config.plugins" },
   },
   -- Configure any other settings here. See the documentation for more details.
   -- colorscheme that will be used when installing plugins.
   -- automatically check for plugin updates
-  checker = { enabled = false },
+  checker = { enabled = true, notify = false },
 })
