@@ -24,18 +24,12 @@ vim.g.maplocalleader = "\\"
 -- Setup lazy.nvim
 require("lazy").setup({
   spec = {
-    {
-      "folke/tokyonight.nvim",
-      config = function()
-        vim.cmd.colorscheme("tokyonight")
-      end,
-    },
     { "wakatime/vim-wakatime", lazy = false },
-    { "windwp/nvim-autopairs", event = "InsertEnter", config = true },
     { "ThePrimeagen/vim-be-good" },
     -- import your plugins
     { import = "config.plugins" },
   },
+  install = { colorscheme = { "kanagawa" } },
   -- Configure any other settings here. See the documentation for more details.
   -- colorscheme that will be used when installing plugins.
   -- automatically check for plugin updates
